@@ -1,21 +1,77 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Vouch } from '@getvouch/sdk';
+import ProofDisplay from '@/app/components/ProofDisplay';
 
-export default function Home() {
+interface WebProof {
+  id: string;
+  proofId: string;
+  requestId: string | null;
+  provider: string | null;
+  subject: string | null;
+  resource: string | null;
+  status: string | null;
+  proofUrl: string | null;
+  payload: any;
+  createdAt: string;
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const requestId = searchParams?.get('requestId');
+  
   const [githubOwner, setGithubOwner] = useState('');
   const [githubRepo, setGithubRepo] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
+  const [proof, setProof] = useState<WebProof | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProof = async () => {
+      if (!requestId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch(`/api/web-proof/${requestId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProof(data);
+        } else {
+          setError('Proof not found yet. It may still be processing.');
+        }
+      } catch (err) {
+        setError('Failed to fetch proof');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProof();
+  }, [requestId]);
 
   const startVerification = () => {
     const vouch = new Vouch();
+    const requestId = window.crypto.randomUUID();
+    
+    // Store requestId for later retrieval
+    localStorage.setItem('lastRequestId', requestId);
+    
+    // For local development, use Vercel URL for webhooks (Vouch needs accessible HTTPS)
+    // In production, this will automatically use the deployed URL
+    const webhookBaseUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL || window.location.origin;
+    
     const verificationUrl = vouch.getStartUrl({
-      requestId: window.crypto.randomUUID(),
+      requestId: requestId,
       datasourceId: "ee72bdf7-cf47-424a-9705-75a96e39153e",
       customerId: "1be03be8-5014-413c-835a-feddf4020da2",
-      redirectBackUrl: `${window.location.origin}`,
-      webhookUrl: `https://docs.getvouch.io/api/web-proof`,
+      redirectBackUrl: `${window.location.origin}?requestId=${requestId}`,
+      webhookUrl: `${webhookBaseUrl}/api/web-proof`,
       inputs: {
         github_owner: githubOwner,
         github_repo: githubRepo,
@@ -61,6 +117,23 @@ export default function Home() {
           </button>
         </div>
         
+        {/* Loading State */}
+        {loading && (
+          <div className="mt-12 text-center">
+            <p className="text-gray-400">Loading proof...</p>
+          </div>
+        )}
+        
+        {/* Error State */}
+        {error && (
+          <div className="mt-12 p-4 rounded-lg bg-red-900/20 border border-red-800 text-red-300">
+            <p>{error}</p>
+          </div>
+        )}
+        
+        {/* Proof Display */}
+        {proof && <ProofDisplay proof={proof} />}
+        
         {/* Powered by vlayer Footer */}
         <div className="mt-16 pt-8 border-t border-gray-800">
           <div className="flex justify-center items-center space-x-2 text-gray-500">
@@ -74,5 +147,17 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
