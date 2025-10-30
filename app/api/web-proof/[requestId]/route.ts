@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
-    const requestId = params.requestId;
+    const { requestId } = await params;
     
     // Find by requestId
     const proof = await prisma.webProof.findFirst({
