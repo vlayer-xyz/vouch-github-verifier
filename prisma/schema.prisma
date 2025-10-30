@@ -14,18 +14,12 @@ model WebProof {
   id        String   @id @default(uuid())
   proofId   String   @unique @map("proof_id")
   requestId String?  @map("request_id")
-  provider  String?
-  subject   String?
-  resource  String?
-  status    String?
-  proofUrl  String?  @map("proof_url")
   payload   Json     @default("{}")
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("web_proofs")
   @@index([proofId])
   @@index([requestId])
-  @@index([subject])
   @@index([createdAt(sort: Desc)])
 }
 

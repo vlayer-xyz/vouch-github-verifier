@@ -9,11 +9,6 @@ interface WebProof {
   id: string;
   proofId: string;
   requestId: string | null;
-  provider: string | null;
-  subject: string | null;
-  resource: string | null;
-  status: string | null;
-  proofUrl: string | null;
   payload: any;
   createdAt: string;
 }

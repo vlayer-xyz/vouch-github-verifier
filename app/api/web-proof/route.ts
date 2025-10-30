@@ -16,21 +16,11 @@ export async function POST(request: NextRequest) {
       where: { proofId: payload.proofId || '' },
       update: {
         requestId: requestId,
-        provider: payload.provider,
-        subject: payload.subject,
-        resource: payload.resource,
-        status: payload.status,
-        proofUrl: payload.proofUrl,
         payload: payload,
       },
       create: {
         proofId: payload.proofId || '',
         requestId: requestId,
-        provider: payload.provider,
-        subject: payload.subject,
-        resource: payload.resource,
-        status: payload.status,
-        proofUrl: payload.proofUrl,
         payload: payload,
       },
     });
