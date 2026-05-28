@@ -50,30 +50,28 @@ function HomeContent() {
     fetchProof();
   }, [requestId]);
 
-  const startVerification = () => {
-    const vouch = new Vouch();
+  const startVerification = async () => {
     const requestId = window.crypto.randomUUID();
-    
-    // Store requestId for later retrieval
     localStorage.setItem('lastRequestId', requestId);
-    
-    // For local development, use Vercel URL for webhooks (Vouch needs accessible HTTPS)
-    // In production, this will automatically use the deployed URL
+
     const webhookBaseUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL || window.location.origin;
-    
-    const verificationUrl = vouch.getStartUrl({
-      requestId: requestId,
-      datasourceId: "ee72bdf7-cf47-424a-9705-75a96e39153e",
+
+    const vouch = new Vouch({
       customerId: "1be03be8-5014-413c-835a-feddf4020da2",
+    });
+
+    const { verificationUrl } = await vouch.getDataSourceUrl({
+      datasourceId: "ee72bdf7-cf47-424a-9705-75a96e39153e",
+      requestId: requestId,
       redirectBackUrl: `${window.location.origin}?requestId=${requestId}`,
       webhookUrl: `${webhookBaseUrl}/api/web-proof`,
       inputs: {
         github_owner: githubOwner,
         github_repo: githubRepo,
-        github_username: githubUsername
-      }
+        github_username: githubUsername,
+      },
     });
-    window.location.href = verificationUrl.toString();
+    window.location.href = verificationUrl;
   };
 
   return (

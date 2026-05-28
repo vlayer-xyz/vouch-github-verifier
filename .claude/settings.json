@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.getvouch.io)",
+      "Bash(npm show *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('latest:', d.get\\('dist-tags',{}\\).get\\('latest'\\)\\); print\\('versions:', d.get\\('versions',[]\\)[-5:]\\)\")",
+      "Bash(xargs ls)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
