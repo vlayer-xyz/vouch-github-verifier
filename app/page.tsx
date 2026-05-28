@@ -50,6 +50,27 @@ function HomeContent() {
     fetchProof();
   }, [requestId]);
 
+  const parseGithubUrl = (value: string): { owner: string; repo: string } | null => {
+    try {
+      const url = new URL(value);
+      if (url.hostname === 'github.com') {
+        const parts = url.pathname.replace(/^\//, '').split('/');
+        if (parts.length >= 2) return { owner: parts[0], repo: parts[1] };
+      }
+    } catch {}
+    return null;
+  };
+
+  const handleRepoChange = (value: string) => {
+    const parsed = parseGithubUrl(value);
+    if (parsed) {
+      setGithubOwner(parsed.owner);
+      setGithubRepo(parsed.repo);
+    } else {
+      setGithubRepo(value);
+    }
+  };
+
   const startVerification = async () => {
     const requestId = window.crypto.randomUUID();
     localStorage.setItem('lastRequestId', requestId);
@@ -58,6 +79,7 @@ function HomeContent() {
 
     const vouch = new Vouch({
       customerId: "1be03be8-5014-413c-835a-feddf4020da2",
+      apiKey: process.env.NEXT_PUBLIC_VOUCH_API_KEY!,
     });
 
     const { verificationUrl } = await vouch.getDataSourceUrl({
@@ -90,8 +112,8 @@ function HomeContent() {
           />
           <input
             value={githubRepo}
-            onChange={(e) => setGithubRepo(e.target.value)}
-            placeholder="GitHub repository"
+            onChange={(e) => handleRepoChange(e.target.value)}
+            placeholder="Repository name or paste GitHub URL"
             className="w-full px-4 py-2 rounded-md bg-gray-900 text-white placeholder-gray-500 border border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600"
           />
           <input
