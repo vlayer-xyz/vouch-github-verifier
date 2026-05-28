@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Vouch } from '@getvouch/sdk';
 import ProofDisplay from '@/app/components/ProofDisplay';
 
 interface WebProof {
@@ -77,22 +76,22 @@ function HomeContent() {
 
     const webhookBaseUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL || window.location.origin;
 
-    const vouch = new Vouch({
-      customerId: "1be03be8-5014-413c-835a-feddf4020da2",
-      apiKey: process.env.NEXT_PUBLIC_VOUCH_API_KEY!,
+    const res = await fetch('/api/start-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requestId,
+        redirectBackUrl: `${window.location.origin}?requestId=${requestId}`,
+        webhookUrl: `${webhookBaseUrl}/api/web-proof`,
+        inputs: {
+          github_owner: githubOwner,
+          github_repo: githubRepo,
+          github_username: githubUsername,
+        },
+      }),
     });
 
-    const { verificationUrl } = await vouch.getDataSourceUrl({
-      datasourceId: "ee72bdf7-cf47-424a-9705-75a96e39153e",
-      requestId: requestId,
-      redirectBackUrl: `${window.location.origin}?requestId=${requestId}`,
-      webhookUrl: `${webhookBaseUrl}/api/web-proof`,
-      inputs: {
-        github_owner: githubOwner,
-        github_repo: githubRepo,
-        github_username: githubUsername,
-      },
-    });
+    const { verificationUrl } = await res.json();
     window.location.href = verificationUrl;
   };
 
