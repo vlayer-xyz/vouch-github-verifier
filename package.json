@@ -12,7 +12,7 @@
   "dependencies": {
     "@getvouch/sdk": "^0.2.0",
     "@prisma/client": "^6.18.0",
-    "next": "16.0.10",
+    "next": "16.2.6",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
@@ -22,9 +22,18 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.0.1",
+    "eslint-config-next": "16.2.6",
     "prisma": "^6.18.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss@<8.5.10": "^8.5.10",
+      "effect@<3.20.0": "^3.20.0",
+      "ajv@<6.14.0": "^6.14.0",
+      "brace-expansion@<1.1.13": "^1.1.13",
+      "brace-expansion@>=2.0.0 <2.0.3": "^2.0.3"
+    }
   }
 }
